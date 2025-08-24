@@ -6,24 +6,7 @@ It includes features such as symptom logging, donor matching, bridge creation (d
 * `backend` — FastAPI server providing REST endpoints for patients, donors, matching, emergency, chat, QR generation, etc.
 * `frontend` — Static single-file HTML/Tailwind UI (and a React app scaffold) used to present patient dashboard, donor search, QR, chat, and forum pages.
 
-This README explains how to run the project locally, debug common issues, and where to integrate backend outputs into the frontend pages.
-
----
-
-## Table of contents
-
-* [Quick summary](#quick-summary)
-* [Prerequisites](#prerequisites)
-* [Repo structure](#repo-structure)
-* [Run with Docker Compose (recommended)](#run-with-docker-compose-recommended)
-* [Run services separately (dev)](#run-services-separately-dev)
-* [Frontend dev / build notes](#frontend-dev--build-notes)
-* [Important API endpoints (reference)](#important-api-endpoints-reference)
-* [How the HTML frontend uses the backend (where to integrate)](#how-the-html-frontend-uses-the-backend-where-to-integrate)
-* [Troubleshooting & common fixes](#troubleshooting--common-fixes)
-* [Testing endpoints with curl](#testing-endpoints-with-curl)
-* [Contributing & next steps](#contributing--next-steps)
-* [License](#license)
+This README explains how to run the project locally, and where to integrate backend outputs into the frontend pages.
 
 ---
 
@@ -47,37 +30,40 @@ This README explains how to run the project locally, debug common issues, and wh
 ## Repo structure (high-level)
 
 ```
-/backend
-  /app
-    main.py          # FastAPI entry (you may need to add or confirm this)
-    api/
-      v1/
-        patients.py
-        donors.py
-        matching.py
-        qrcode.py     # QR generation route already present
-        ...
-    services/
-      blood_matching_service.py
-      emergency_qr_service.py
-      ...
-  Dockerfile
-  requirements.txt
-  start_backend.sh
-
-/frontend
-  public/
-    t-care.html      # Single-file (Tailwind) UI you use
-  src/
-    (React app src files — optional / unfinished)
-  Dockerfile
-  nginx.conf
-  start_frontend.sh
-  package.json
-docker-compose.yml
+.
+├── README.md
+├── ai_knowledge
+│   ├── blood_compatibility.json
+│   └── thalassemia_data.json
+├── backend
+│   ├── Dockerfile
+│   ├── __pycache__
+│   ├── alembic
+│   ├── app
+│   ├── data
+│   ├── main.py
+│   ├── requirements.txt
+│   ├── scripts
+│   ├── start_backend.sh
+│   └── test.db
+├── data
+│   └── hackathon_data.csv
+├── docker-compose.dev.yml
+├── docker-compose.prod.yml
+├── docker-compose.yml
+└── frontend
+    ├── Dockerfile
+    ├── build
+    ├── nginx.conf
+    ├── node_modules
+    ├── package-lock.json
+    ├── package.json
+    ├── public
+    ├── src
+    └── start_frontend.sh
 ```
 
-> Note: your repo contains both a static `t-care.html` (Tailwind single-file UI) and a React app scaffold. You can use the HTML file as the easiest quick frontend (no build step) but ensure `API_BASE` is pointing to the backend.
+> Note: the repo contains both a static `t-care.html` (Tailwind single-file UI) and a React app scaffold. You can use the HTML file as the easiest quick frontend (no build step) but ensure `API_BASE` is pointing to the backend.
 
 ---
 
@@ -148,8 +134,6 @@ npm start
 # dev server typically runs at http://localhost:3000
 ```
 
-**Important:** The React build may fail if some dependencies are missing (example earlier: `react-hot-toast` missing). If `npm run build` fails mentioning module not found, install the missing package:
-
 ```bash
 npm install react-hot-toast
 # or install all deps
@@ -183,7 +167,7 @@ This is a short summary of the backend endpoints available in the `backend` serv
 
 ---
 
-## How the HTML frontend uses the backend (where to integrate)
+## How the HTML frontend uses the backend 
 
 If you are using the single-file `t-care.html` (Tailwind + vanilla JS), here are the places to add or update code so backend outputs are used:
 
@@ -241,51 +225,6 @@ If you are using the single-file `t-care.html` (Tailwind + vanilla JS), here are
 
 ---
 
-Error:
-
-```
-docker: Error response from daemon: Conflict. The container name "/tcare-frontend" is already in use...
-```
-
-Fix:
-
-```bash
-docker ps -a                 # find IDs and names
-docker rm -f <container_id>  # remove problematic ones
-# or stop compose and restart
-docker compose down
-docker compose up --build
-```
-
-If port 3000 is used:
-
-```bash
-sudo lsof -i :3000
-# kill the process or change port mapping
-```
-
-### React build failure: `Module not found: Can't resolve 'react-hot-toast'`
-
-Install the missing dependency:
-
-```bash
-cd frontend
-npm install react-hot-toast
-npm run build
-```
-
-### FastAPI: `Error loading ASGI app. Could not import module "main"`
-
-Make sure the uvicorn command points to the correct import path of the FastAPI app:
-
-* If your app variable is in `backend/app/main.py` and is called `app`, run:
-
-  ```bash
-  uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-  ```
-
----
-
 ## Testing endpoints with `curl`
 
 Fetch patient:
@@ -319,23 +258,10 @@ http://localhost:8000/api/v1/qrcode/Patient:1
 curl http://localhost:8000/api/v1/qrcode/Patient:1 -o qr.png
 ```
 
----
-
-## Contribution & next steps
-
-* If you want me to:
-
-  * produce a fully integrated `t-care.html` with working `loadMatches()` and `loadQRCode()` code wired to your API — I can generate that single-file and you can drop it into `frontend/public/t-care.html`.
-  * or produce a minimal `app/main.py` for FastAPI if it is missing — I can provide a robust `main.py` that includes routers and CORS middleware.
-
-* Tests & validation:
-
-  * Verify backend endpoints return JSON with the expected fields your UI expects (donor id, name, blood\_group, distance\_km, score, eligibility\_status).
-  * Add additional unit tests for matching and bridges if desired.
 
 ---
 
-## Useful commands (summary)
+## Useful commands 
 
 ```bash
 # docker compose
