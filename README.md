@@ -14,7 +14,7 @@ This README explains how to run the project locally, and where to integrate back
 
 * Backend default base URL: `http://localhost:8000/api/v1`
 * Frontend default served on Nginx: `http://localhost:3000` (or `http://localhost:80` depending on how you run it)
-* Use Docker Compose to run both services together: `docker compose up --build` (from repo root)
+* Use Docker Compose to run both services together: `docker compose up --build` 
 
 ---
 
