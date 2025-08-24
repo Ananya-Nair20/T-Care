@@ -1,0 +1,21 @@
+version: "3.9"
+
+services:
+  backend:
+    build: ./backend
+    container_name: tcare-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: ["sh", "/app/start_backend.sh"]
+
+  frontend:
+    build: ./frontend
+    container_name: tcare-frontend
+    ports:
+      - "8080:80"   # frontend will be available at http://localhost:8080
+    depends_on:
+      - backend

@@ -1,0 +1,26 @@
+version: "3.9"
+
+services:
+  backend:
+    build: ./backend
+    container_name: tcare-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: ["sh", "/app/start_backend.sh"]
+
+  frontend:
+    build: ./frontend
+    container_name: tcare-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend/start_frontend.sh:/start_frontend.sh:ro
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000/api/v1
+    command: ["sh", "/start_frontend.sh"]
