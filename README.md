@@ -159,18 +159,6 @@ npm run build
 
 ---
 
-## Frontend dev / build notes
-
-* If you prefer to rapidly prototype, **use `public/t-care.html`** (single-file, Tailwind via CDN). This avoids React build complexity while enabling backend integration with plain JS `fetch()` calls.
-* Ensure the global `API_BASE` variable in the HTML/JS is set to your backend base `http://localhost:8000/api/v1`.
-* If using the React app, fix missing imports and missing exports errors:
-
-  * `handleAPIError` must be exported from `src/services/api.js` if used by components.
-  * Install missing npm packages (example `react-hot-toast`, `qrcode`, etc.).
-* When building the frontend for Docker, the Dockerfile usually runs `npm run build`. If `npm run build` fails locally, fix errors before building Docker.
-
----
-
 ## Important API endpoints (reference)
 
 This is a short summary of the backend endpoints available in the `backend` service (paths are relative to `API_BASE`):
@@ -253,10 +241,6 @@ If you are using the single-file `t-care.html` (Tailwind + vanilla JS), here are
 
 ---
 
-## Troubleshooting & common fixes
-
-### Containers exist / port already in use
-
 Error:
 
 ```
@@ -298,27 +282,6 @@ Make sure the uvicorn command points to the correct import path of the FastAPI a
 
   ```bash
   uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-  ```
-
-### Nginx default "Welcome to nginx!" page
-
-* This indicates the container is running but serving the default nginx default.conf.
-* Ensure your `frontend` Dockerfile copies the built `build` or `public` files into `/usr/share/nginx/html` and your `nginx.conf` points to the right index.
-* Check `docker logs <frontend-container-id>` and `docker exec -it <frontend-container> ls /usr/share/nginx/html` to see what is present.
-
-### CORS errors in browser console
-
-* Add CORS middleware to FastAPI:
-
-  ```py
-  from fastapi.middleware.cors import CORSMiddleware
-  app.add_middleware(
-      CORSMiddleware,
-      allow_origins=["http://localhost:3000","http://localhost:8080","http://127.0.0.1:3000"], # dev
-      allow_credentials=True,
-      allow_methods=["*"],
-      allow_headers=["*"],
-  )
   ```
 
 ---
